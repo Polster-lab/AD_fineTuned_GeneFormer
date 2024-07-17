@@ -15,7 +15,6 @@ from imblearn.under_sampling import RandomUnderSampler
 
 # %%
 df = pd.read_csv('PFC427_train_clean_anno.csv')
-df_resampled = pd.read_csv('PFC427_train_clean_anno_sample.csv')
 
 # %%
 le = LabelEncoder()
@@ -71,3 +70,5 @@ print(counts_df2)
 
 print("\nResampled counts for 'AD_diagnosis':")
 print(counts_df_resampled2)
+
+df_resampled.to_csv('df_resampled.csv', index=False)
