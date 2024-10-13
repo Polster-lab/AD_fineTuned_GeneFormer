@@ -1,44 +1,50 @@
 from bioservices import BioMart
 import pandas as pd
-import anndata
+import os
 
-adata = anndata.read_h5ad('PFC427.h5ad')
 
-adata_obs_df = pd.DataFrame(adata.obs)
-adata_var_df = pd.DataFrame(adata.var)
+filename = 'PFC427_test_clean'
+df = pd.read_csv(filename+'.csv')
+df.rename(columns={'Unnamed: 0': 'gene_name'}, inplace=True)
+df
 
-bm = BioMart()
-bm.registry()
-bm.database = 'ensembl'
-bm.dataset = 'hsapiens_gene_ensembl'
+# initialize BioMart service
+mart = BioMart()
 
-# get a list of gene names from the index of the var DataFrame
-gene_names = adata.var.index.tolist()
+# check available datasets (for confirmation)
+datasets = mart.get_datasets("ENSEMBL_MART_ENSEMBL")
+print("Available datasets:\n", datasets)
 
-xml_query = """
-<!DOCTYPE Query>
-<Query  virtualSchemaName = "default" formatter = "TSV" header = "0" uniqueRows = "0" count = "" datasetConfigVersion = "0.6" >
-    <Dataset name = "hsapiens_gene_ensembl" interface = "default" >
-        <Filter name = "external_gene_name" value = "{}"/>
-        <Attribute name = "ensembl_gene_id" />
-        <Attribute name = "external_gene_name" />
-    </Dataset>
-</Query>
-""".format(",".join(gene_names))
+# start query for human genes
+mart.new_query()
+mart.add_dataset_to_xml("hsapiens_gene_ensembl")
 
-response = bm.query(xml_query)
+# add attributes and filters
+mart.add_attribute_to_xml("hgnc_symbol")
+mart.add_attribute_to_xml("ensembl_gene_id")
 
-# the response is a string with each line corresponding to a gene. we can split it into lines and then split each line into columns to create a DataFrame.
-lines = response.split("\n")
-data = [line.split("\t") for line in lines if line]
-result_df = pd.DataFrame(data, columns=["ensembl_gene_id", "external_gene_name"])
-# remove duplicates from result_df
-result_df = result_df.drop_duplicates('external_gene_name')
+gene_names = df['gene_name'].tolist()
+gene_names = ",".join(gene_names)
+mart.add_filter_to_xml("hgnc_symbol", gene_names)
 
-# left join to include all gene names from adata.var
-merged_df = pd.merge(adata.var, result_df, how='left', left_on=adata.var.index, right_on='external_gene_name')
+# generate XML query and print (to check if it's being generated correctly)
+xml_query = mart.get_xml()
+print("Generated XML query:\n", xml_query)
 
-print("Merged DataFrame:")
-print(merged_df)
+try:
+    response = mart.query(xml_query)
+    print("Response received:\n", response)
+except Exception as e:
+    print(f"Error in querying BioMart: {e}")
 
-merged_df.to_csv('ensembl_ID_bioservices.csv', index=False)
+# split response into lines, then split each line by tab
+data = [line.split("\t") for line in response.strip().split("\n")]
+response_df = pd.DataFrame(data, columns=['gene_name', 'ensembl_gene_id'])
+
+# drop duplicates, merge with left join
+response_df = response_df.drop_duplicates(subset='gene_name')
+df_ensembl = pd.merge(df, response_df, on='gene_name', how='left')
+df_ensembl
+
+# save to csv
+df_ensembl.to_csv(filename+'_ensembl.csv', index=False)
