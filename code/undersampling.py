@@ -3,10 +3,6 @@ import datetime
 import os
 import scanpy as sc
 from sklearn.model_selection import train_test_split
-#from geneformer import Classifier
-from custom_geneformer import CustomClassifier
-from geneformer.classifier_utils import downsample_and_shuffle
-from geneformer.perturber_utils import load_and_filter, downsample_and_sort
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import LabelEncoder
@@ -14,7 +10,7 @@ import matplotlib.pyplot as plt
 from imblearn.under_sampling import RandomUnderSampler
 
 # %%
-df = pd.read_csv('PFC427_train_clean_anno.csv')
+df = pd.read_csv('PFC427_test_clean_anno_obs.csv')
 
 # %%
 le = LabelEncoder()
@@ -71,4 +67,5 @@ print(counts_df2)
 print("\nResampled counts for 'AD_diagnosis':")
 print(counts_df_resampled2)
 
-df_resampled.to_csv('df_resampled.csv', index=False)
+# %%
+df_resampled.to_csv('PFC427_test_clean_anno_sample_obs.csv', index='cellName')
