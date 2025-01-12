@@ -49,7 +49,7 @@ Below is the sequence of scripts used. Note that each script may depend on prior
 - **In Silico Perturbations**: Geneformer’s capability to “perturb” or “knock out” genes computationally can highlight genes relevant to certain cell-type signatures. Some discovered genes are not widely recognized in AD literature, suggesting either novel leads or noise.
 - **Future Work**: Newer versions of Geneformer, with double the amount of attention layers and genes selected, are very promising, showcasing better metrics in AD classification. 
 
-# Attribution
+# Citations
 
 This repository **does not contain** the complete dataset or all analysis details from the references below. We **credit** both the ROSMAP group and the Geneformer authors for their foundational work:
 
