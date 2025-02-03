@@ -1,0 +1,19 @@
+Bootstrap: docker
+From: continuumio/miniconda3:24.1.2-0
+
+%files
+    Geneformer
+    environment.yml
+
+%post
+    . /opt/conda/etc/profile.d/conda.sh
+    conda env create -f environment.yml
+    conda activate geneformer
+    git lfs install
+    cd Geneformer
+    pip install .
+    pip install pipdeptree
+    conda clean -afy
+
+%environment
+    export PATH="/opt/conda/envs/geneformer/bin:$PATH"
