@@ -12,8 +12,10 @@ From: continuumio/miniconda3:24.1.2-0
     git lfs install
     cd Geneformer
     pip install .
+    pip install hyperopt
     pip install pipdeptree
     conda clean -afy
 
 %environment
+    # set path to Geneformer env by default
     export PATH="/opt/conda/envs/geneformer/bin:$PATH"
